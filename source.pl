@@ -1,17 +1,12 @@
-
-# State representation:
-    # 
-# [
-#     AgentPosition,
-#     StateCost,
-#     Square0IsDirty,
-#     Square1IsDirty,
-#     Square2IsDirty,
-#     Square3IsDirty
-# ]
-#
-# Example: [2, 10, 1, 1, 0, 0]
-# 
+/**
+ * source.pl
+ *  
+ * Describes a solution for the dust cleaner 
+ * problem in an 2x2 space using A* algorithm.
+ *
+ * @author lucasdavid
+ *
+ */
 
 best_first([], _ , _ )
 :-
@@ -38,6 +33,16 @@ best_first([[F, S, D, H]|T], C, [_,G,_,_])
     best_first(O, [[F, S, D, H] | C], [G, _, _, _])
 .
 
+/**
+ *
+ * Moves agent from @AgentPosition to a new position, according with the movement 
+ * specified in @Direction, and creates a new state @NewState, with the updated position.
+ *
+ * @param State
+ * @param Direction
+ * @param out NewState
+ *
+ */
 move([AgentPosition, StateCost | T], Direction, NewState)
 :-
     Direction = left
@@ -61,6 +66,14 @@ move([AgentPosition, StateCost | T], Direction, NewState)
     NewState = []
 .
 
+/**
+ *
+ * Calculates the function F = G(State) + H(State)
+ * 
+ * @param State
+ * @param out F
+ *
+ */
 calculaF(State, F)
 :-
     calculaG(State, G),
@@ -68,9 +81,26 @@ calculaF(State, F)
     F = G + H
 .
 
+/**
+ *
+ * Returns G(State), where G is the function cost on a given state @State.
+ * 
+ * @param State
+ * @param out G
+ *
+ */
 calculaG([AgentPosition, StateCost, Squares], G)
     :- G = StateCost .
 
+/**
+ *
+ * Calculates the heuristic function H.
+ * H(State) = n, where @n is the number of unclean squares in a given state @State.
+ * 
+ * @param State
+ * @param out F
+ *
+ */
 calculaH([Agent | Squares], H)
     :- innerCalculaH(Squares, H) .
 
