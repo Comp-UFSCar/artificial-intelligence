@@ -60,3 +60,28 @@ move([AgentPosition, StateCost | T], Direction, NewState)
     write(Direction),
     NewState = []
 .
+
+calculaF(State, F)
+:-
+    calculaG(State, G),
+    calculaH(State, H),
+    F = G + H
+.
+
+calculaG([AgentPosition, StateCost, Squares], G)
+    :- G = StateCost .
+
+calculaH([Agent | Squares], H)
+    :- innerCalculaH(Squares, H) .
+
+innerCalculaH([], H)
+    :- H = 0 .
+
+innerCalculaH([Square | T], H)
+:-
+    innerCalculaH(T, InnerH),
+    (
+        Square = 1 , H = InnerH + 1 ;
+        Square = 0 , H = InnerH
+    )
+.
