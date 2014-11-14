@@ -15,16 +15,17 @@ best_first([], _ , _ )
 
 best_first([[_, G, _, _]|T], C, [_, G, _, _])
 :-
-    write('open: '), printlist([ G | T ] ), nl,
-    write('open: '), printlist([ G | T ] ), nl,
+    write('open: '), printlist([G|T]), nl,
+    write('open: '), printlist([G|T]), nl,
     write('closed: '), printlist(C), nl,
     write('OBJETIVO: '), write(G), nl,
     write('Solução encontrada'), nl
 .
 
+%# best_first([[4, [0, 1, 1, 1, 1], 0, 4]], [], [_,[0, 0, 0, 0, 0],_,_])
 best_first([[F, S, D, H]|T], C, [_,G,_,_])
 :-
-    write('open: '), printlist([ S | T ] ), nl,
+    write('open: '), printlist([S|T]), nl,
     write('closed: '), printlist(C), nl,
     findall(X, moves([F, S, D, H], T, C, X), List),
     write('nos gerados: '), printlist(List), nl,
@@ -33,53 +34,50 @@ best_first([[F, S, D, H]|T], C, [_,G,_,_])
     best_first(O, [[F, S, D, H] | C], [G, _, _, _])
 .
 
-/**
- *
- * Moves agent from @AgentPosition to a new position, according with the movement 
- * specified in @Direction, and creates a new state @NewState, with the updated position.
- *
- * @param State
- * @param Direction
- * @param out NewState
- *
- */
-move([AgentPosition, StateCost | T], Direction, NewState)
+moves([F, S, D, H], T, C, [NF, A, NG, NH])
 :-
-    Direction = left
-    ( AgentPosition =:= 0 ; AgentPosition =:= 2 ),
-    NewState = [AgentPosition +1, StateCost +2 | T]
-    ;
-    Direction = right
-    ( AgentPosition =:= 1 ; AgentPosition =:= 3 ),
-    NewState = [AgentPosition -1, StateCost +2 | T]
-    ;
-    Direction = up
-    ( AgentPosition =:= 2 ; AgentPosition =:= 3 ),
-    NewState = [AgentPosition -2, StateCost +3 | T]
-    ;
-    Direction = down
-    ( AgentPosition =:= 0 ; AgentPosition =:= 1 ),
-    NewState = [AgentPosition +2, StateCost +3 | T]
-    ;
-    write('Invalid movement: '), printlist([AgentPosition | T]),
-    write(Direction),
-    NewState = []
+    move(S, A), S \= A,
+    not(member([A, _, _, _], T)),
+    not(member([A, _, _, _], C)),
+    calculaG(S, A, D, NG),
+    calculaH(A, NH),
+    NF is NG + NH
+.
+
+printlist([]).
+printlist([[AgentsPos, S0, S1, S2, S3] | T])
+:-
+    write('  Agent\'s position: '), write(AgentsPos),
+    write('  Squares: '), write(S0), write(S1), write(S2), write(S3)
 .
 
 /**
  *
- * Calculates the function F = G(State) + H(State)
+ * Returns NewState, a new generated state from a current state @State.
  * 
  * @param State
- * @param out F
+ * @param out NewState
  *
  */
-calculaF(State, F)
-:-
-    calculaG(State, G),
-    calculaH(State, H),
-    F = G + H
-.
+%# Right movement
+%# Agent's in square [0, 0] or [1, 0]
+move([AgentsPos, S0, S1, S2, S3], [AgentsPos +1, S0, S1, S2, S3])
+    :- AgentsPos = 0; AgentsPos = 2.
+
+%# Down movement
+%# Agent's in square [0, 0] or [0, 1]
+move([AgentsPos, S0, S1, S2, S3], [AgentsPos +2, S0, S1, S2, S3])
+    :- AgentsPos = 0; AgentsPos = 1.
+
+%# Left movement
+%# Agent's in square [0, 1] or [1, 1]
+move([AgentsPos, S0, S1, S2, S3], [AgentsPos -1, S0, S1, S2, S3])
+    :- AgentsPos = 1; AgentsPos = 3.
+
+%# Up movement
+%# Agent's in square [1, 0] or [1, 1]
+move([AgentsPos, S0, S1, S2, S3], [AgentsPos -2, S0, S1, S2, S3])
+    :- AgentsPos = 2; AgentsPos = 3.
 
 /**
  *
@@ -89,8 +87,19 @@ calculaF(State, F)
  * @param out G
  *
  */
-calculaG([AgentPosition, StateCost, Squares], G)
-    :- G = StateCost .
+%# When the agent has moved...
+calculaG([AgentsPos, S0, S1, S2, S3], [NewAgentsPos, S0, S1, S2, S3], InitialCost, NewCost)
+:-
+    AgentsPos \= NewAgentsPos,
+    G is InitialCost + abs(AgentsPos - NewAgentsPos)
+.
+
+%# When the agent has cleaned
+calculaG([AgentsPos, S0, S1, S2, S3], [AgentsPos, NewS0, NewS1, NewS2, NewS3], InitialCost, NewCost)
+:-
+    (S0 \= NewS0 ; S1 \= NewS1 ; S2 \= NewS2 ; S3 \= NewS3),
+    G is InitialCost + 3
+.
 
 /**
  *
@@ -101,7 +110,7 @@ calculaG([AgentPosition, StateCost, Squares], G)
  * @param out F
  *
  */
-calculaH([Agent | Squares], H)
+calculaH([_|Squares], H)
     :- innerCalculaH(Squares, H) .
 
 innerCalculaH([], H)
@@ -110,8 +119,5 @@ innerCalculaH([], H)
 innerCalculaH([Square | T], H)
 :-
     innerCalculaH(T, InnerH),
-    (
-        Square = 1 , H = InnerH + 1 ;
-        Square = 0 , H = InnerH
-    )
+    (Square = 1, H = InnerH + 1 ; Square = 0 , H = InnerH)
 .
