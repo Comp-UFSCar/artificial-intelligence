@@ -28,6 +28,7 @@ best_first([[F, G, D, H]|T], C, [_, G, _, _])
 
 best_first([[F, S, D, H]|T], C, [_,G,_,_])
 :-
+    write('Best first em andamento'), nl,
     write('Open'), nl,
     printlist([[F, S, D, H]|T]), nl,
     
@@ -61,11 +62,12 @@ printlist([])
 
 printlist([[F, [AgentsPos, S0, S1, S2, S3], D, H] | T])
 :-
-    write(AgentsPos), write(' '),
-    write(S0), write(S1), write(S2), write(S3),
-    write(' F='), write(F),
+    write('['), write(AgentsPos),
+    write(']['),
+    write(S0), write(S1), write(S2), write(S3), write(']'),
     write(' D='), write(D),
     write(' H='), write(H),
+    write(' F='), write(F),
     write(', '), printlist(T)
 .
 
