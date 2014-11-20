@@ -5,32 +5,44 @@
 %
 % @author lucasdavid
 %
+% Input example:
+% best_first([[4, [0, 1, 1, 1, 1], 0, 4]], [], [_,[0, 0, 0, 0, 0],_,_]).
 
 best_first([], _ , _ )
 :-
     write('Solucao nao encontrada'), nl
 .
 
-best_first([[_, G, _, _]|T], C, [_, G, _, _])
+best_first([[F, G, D, H]|T], C, [_, G, _, _])
 :-
-    write('open: '), printlist([G|T]), nl,
-    write('open: '), printlist([G|T]), nl,
-    write('closed: '), printlist(C), nl,
-    write('OBJETIVO: '), write(G), nl,
-    write('Solucao encontrada'), nl
+    write('Solucao encontrada'), nl,
+    
+    write('Open'), nl,
+    printlist([[F, G, D, H]|T]), nl,
+    
+    write('Closed'), nl,
+    printlist(C), nl,
+
+    write('Objetivo: '), write(G), nl
 .
 
-% input example:
-% best_first([[4, [0, 1, 1, 1, 1], 0, 4]], [], [A,[0, 0, 0, 0, 0],B,C]).
 best_first([[F, S, D, H]|T], C, [_,G,_,_])
 :-
-    write('open: '), printlist([[F, S, D, H]|T]), nl,
-    write('closed: '), printlist(C), nl,
+    write('Open'), nl,
+    printlist([[F, S, D, H]|T]), nl,
+    
+    write('Closed'), nl,
+    printlist(C), nl,
+    
     findall(X, moves([F, S, D, H], T, C, X), List),
-    write('nos gerados: '), printlist(List), nl,
+    
+    write('Nos gerados'), nl,
+    printlist(List), nl,
+    
     sort(List, NewList),
     merge(T, NewList, O),
-    best_first(O, [[F, S, D, H] | C], [G,_,_,_])
+    
+    best_first(O, [[F, S, D, H] | C], [_, G, _, _])
 .
 
 moves([F, S, D, H], T, C, [NF, A, ND, NH])
@@ -45,14 +57,16 @@ moves([F, S, D, H], T, C, [NF, A, ND, NH])
 
 printlist([])
 :-
-    write('\n').
+    nl.
 
 printlist([[F, [AgentsPos, S0, S1, S2, S3], D, H] | T])
 :-
-    write('\nAgent\'s position:'), write(AgentsPos),
-    write(' squares:'), write(S0), write(S1), write(S2), write(S3),
-    write(' F='), write(F), write(' D='), write(D), write(' H='), write(H),
-    printlist(T)
+    write(AgentsPos), write(' '),
+    write(S0), write(S1), write(S2), write(S3),
+    write(' F='), write(F),
+    write(' D='), write(D),
+    write(' H='), write(H),
+    write(', '), printlist(T)
 .
 
 % Returns NewState, a new generated state from a current state @State.
