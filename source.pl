@@ -35,10 +35,9 @@ best_first([[F, S, D, H]|T], C, [_,G,_,_])
 
 moves([F, S, D, H], T, C, [NF, A, ND, NH])
 :-
-    write('moves called'),
     move(S, A), S \= A,
-    not(member([A, _, _, _], T)),
-    not(member([A, _, _, _], C)),
+    not(member([_, A, _, _], T)),
+    not(member([_, A, _, _], C)),
     calculaG(S, A, D, ND),
     calculaH(A, NH),
     NF is ND + NH
@@ -56,8 +55,6 @@ printlist([[F, [AgentsPos, S0, S1, S2, S3], D, H] | T])
     printlist(T)
 .
 
-%
-%
 % Returns NewState, a new generated state from a current state @State.
 % 
 % @param State
@@ -68,7 +65,7 @@ printlist([[F, [AgentsPos, S0, S1, S2, S3], D, H] | T])
 % Agent's in square [0, 0] or [1, 0]
 move([AgentsPos, S0, S1, S2, S3], [NewAgentsPos, S0, S1, S2, S3])
 :-
-    AgentsPos = 0; AgentsPos = 2,
+    (AgentsPos = 0; AgentsPos = 2),
     NewAgentsPos is AgentsPos + 1
 .
 
@@ -76,7 +73,7 @@ move([AgentsPos, S0, S1, S2, S3], [NewAgentsPos, S0, S1, S2, S3])
 % Agent's in square [0, 0] or [0, 1]
 move([AgentsPos, S0, S1, S2, S3], [NewAgentsPos, S0, S1, S2, S3])
 :-
-    AgentsPos = 0; AgentsPos = 1,
+    (AgentsPos = 0; AgentsPos = 1),
     NewAgentsPos is AgentsPos + 2
 .
 
@@ -84,7 +81,7 @@ move([AgentsPos, S0, S1, S2, S3], [NewAgentsPos, S0, S1, S2, S3])
 % Agent's in square [0, 1] or [1, 1]
 move([AgentsPos, S0, S1, S2, S3], [NewAgentsPos, S0, S1, S2, S3])
 :-
-    AgentsPos = 1; AgentsPos = 3,
+    (AgentsPos = 1; AgentsPos = 3),
     NewAgentsPos is AgentsPos - 1
 .
 
@@ -92,7 +89,7 @@ move([AgentsPos, S0, S1, S2, S3], [NewAgentsPos, S0, S1, S2, S3])
 % Agent's in square [1, 0] or [1, 1]
 move([AgentsPos, S0, S1, S2, S3], [NewAgentsPos, S0, S1, S2, S3])
 :-
-    AgentsPos = 2; AgentsPos = 3,
+    (AgentsPos = 2; AgentsPos = 3),
     NewAgentsPos is AgentsPos - 2
 .
 
@@ -109,8 +106,6 @@ move([AgentsPos, S0, S1, S2, S3], [AgentsPos, S0, S1, 0, S3])
 move([AgentsPos, S0, S1, S2, S3], [AgentsPos, S0, S1, S2, 0])
     :- AgentsPos = 3, S3 = 1.
 
-%
-%
 % Returns G(State), where G is the function cost on a given state @State.
 % 
 % @param State
