@@ -172,15 +172,15 @@ wasAnySquareCleaned([_ | Squares], [_ | NewSquares])
 % When the agent has moved...
 calculaG([AgentsPos, S0, S1, S2, S3], [NewAgentsPos, S0, S1, S2, S3], InitialCost, NewCost)
 :-
-    AgentsPos \= NewAgentsPos,
     NewCost is InitialCost + abs(AgentsPos - NewAgentsPos),
+    AgentsPos \= NewAgentsPos,
     !
 .
 
 % When the agent has cleaned
 calculaG([AgentsPos | Squares], [AgentsPos | NewSquares], InitialCost, NewCost)
 :-
-    wasAnySquareCleaned(Squares, NewSquares),
+    Squares \= NewSquares,
     NewCost is InitialCost + 3
 .
 
