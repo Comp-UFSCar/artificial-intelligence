@@ -10,7 +10,8 @@
 
 best_first([], _ , _ )
 :-
-    write('Solucao nao encontrada'), nl
+    write('Solucao nao encontrada'), nl,
+    !
 .
 
 best_first([[F, G, D, H]|T], C, [_, G, _, _])
@@ -23,7 +24,8 @@ best_first([[F, G, D, H]|T], C, [_, G, _, _])
     write('Closed'), nl,
     printlist(C), nl,
 
-    write('Objetivo: '), write(G), nl
+    write('Objetivo: '), write(G), nl,
+    !
 .
 
 best_first([[F, S, D, H]|T], C, [_,G,_,_])
@@ -46,7 +48,7 @@ best_first([[F, S, D, H]|T], C, [_,G,_,_])
     best_first(O, [[F, S, D, H] | C], [_, G, _, _])
 .
 
-moves([F, S, D, H], T, C, [NF, A, ND, NH])
+moves([_, S, D, _], T, C, [NF, A, ND, NH])
 :-
     move(S, A), S \= A,
     not(member([_, A, _, _], T)),
@@ -62,9 +64,7 @@ printlist([])
 
 printlist([[F, [AgentsPos, S0, S1, S2, S3], D, H] | T])
 :-
-    write('['), write(AgentsPos),
-    write(']['),
-    write(S0), write(S1), write(S2), write(S3), write(']'),
+    write('['), write(AgentsPos),write(']['),write(S0), write(S1), write(S2), write(S3), write(']'),
     write(' D='), write(D),
     write(' H='), write(H),
     write(' F='), write(F),
@@ -78,7 +78,7 @@ printlist([[F, [AgentsPos, S0, S1, S2, S3], D, H] | T])
 %
 %
 % Right movement
-% Agent's in square [0, 0] or [1, 0]
+% Agent is in square [0, 0] or [1, 0]
 move([AgentsPos, S0, S1, S2, S3], [NewAgentsPos, S0, S1, S2, S3])
 :-
     (AgentsPos = 0; AgentsPos = 2),
@@ -86,7 +86,7 @@ move([AgentsPos, S0, S1, S2, S3], [NewAgentsPos, S0, S1, S2, S3])
 .
 
 % Down movement
-% Agent's in square [0, 0] or [0, 1]
+% Agent is in square [0, 0] or [0, 1]
 move([AgentsPos, S0, S1, S2, S3], [NewAgentsPos, S0, S1, S2, S3])
 :-
     (AgentsPos = 0; AgentsPos = 1),
@@ -94,7 +94,7 @@ move([AgentsPos, S0, S1, S2, S3], [NewAgentsPos, S0, S1, S2, S3])
 .
 
 % Left movement
-% Agent's in square [0, 1] or [1, 1]
+% Agent is in square [0, 1] or [1, 1]
 move([AgentsPos, S0, S1, S2, S3], [NewAgentsPos, S0, S1, S2, S3])
 :-
     (AgentsPos = 1; AgentsPos = 3),
@@ -102,7 +102,7 @@ move([AgentsPos, S0, S1, S2, S3], [NewAgentsPos, S0, S1, S2, S3])
 .
 
 % Up movement
-% Agent's in square [1, 0] or [1, 1]
+% Agent is in square [1, 0] or [1, 1]
 move([AgentsPos, S0, S1, S2, S3], [NewAgentsPos, S0, S1, S2, S3])
 :-
     (AgentsPos = 2; AgentsPos = 3),
@@ -110,17 +110,58 @@ move([AgentsPos, S0, S1, S2, S3], [NewAgentsPos, S0, S1, S2, S3])
 .
 
 % Cleaning
-move([AgentsPos, S0, S1, S2, S3], [AgentsPos, 0, S1, S2, S3])
-    :- AgentsPos = 0, S0 = 1.
+move([AgentsPos | Squares], [AgentsPos | Result])
+:-
+    isSquareDirty(Squares, AgentsPos, 0),
+    cleanSquare(Squares, AgentsPos, 0, Result)
+.
 
-move([AgentsPos, S0, S1, S2, S3], [AgentsPos, S0, 0, S2, S3])
-    :- AgentsPos = 1, S1 = 1.
+isSquareDirty([Square|_], Nth, Current)
+:-
+    Current =:= Nth,
+    Square  =:= 1,
+    !
+.
 
-move([AgentsPos, S0, S1, S2, S3], [AgentsPos, S0, S1, 0, S3])
-    :- AgentsPos = 2, S2 = 1.
+isSquareDirty([_|T], Nth, Current)
+:-
+    Current    < Nth,
+    NewCurrent is Current + 1,
+    isSquareDirty(T, Nth, NewCurrent),
+    !
+.
 
-move([AgentsPos, S0, S1, S2, S3], [AgentsPos, S0, S1, S2, 0])
-    :- AgentsPos = 3, S3 = 1.
+cleanSquare([], _, _, Result)
+:-
+    Result = [], !
+.
+
+cleanSquare([Square | Squares], Nth, Current, [Square | Result])
+:-
+    Current \= Nth,
+    NewCurrent is Current + 1,
+    cleanSquare(Squares, Nth, NewCurrent, Result),
+    !
+.
+
+cleanSquare([_|Squares], Nth, Current, [0 | Result])
+:-
+    Current =:= Nth,
+    NewCurrent is Current + 1,
+    cleanSquare(Squares, Nth, NewCurrent, Result),
+    !
+.
+
+wasAnySquareCleaned([Square | _], [NewSquare | _])
+:-
+    Square =\= NewSquare,
+    !
+.
+
+wasAnySquareCleaned([_ | Squares], [_ | NewSquares])
+:-
+    wasAnySquareCleaned(Squares, NewSquares)
+.
 
 % Returns G(State), where G is the function cost on a given state @State.
 % 
@@ -132,13 +173,14 @@ move([AgentsPos, S0, S1, S2, S3], [AgentsPos, S0, S1, S2, 0])
 calculaG([AgentsPos, S0, S1, S2, S3], [NewAgentsPos, S0, S1, S2, S3], InitialCost, NewCost)
 :-
     AgentsPos \= NewAgentsPos,
-    NewCost is InitialCost + abs(AgentsPos - NewAgentsPos)
+    NewCost is InitialCost + abs(AgentsPos - NewAgentsPos),
+    !
 .
 
 % When the agent has cleaned
-calculaG([AgentsPos, S0, S1, S2, S3], [AgentsPos, NewS0, NewS1, NewS2, NewS3], InitialCost, NewCost)
+calculaG([AgentsPos | Squares], [AgentsPos | NewSquares], InitialCost, NewCost)
 :-
-    (S0 \= NewS0 ; S1 \= NewS1 ; S2 \= NewS2 ; S3 \= NewS3),
+    wasAnySquareCleaned(Squares, NewSquares),
     NewCost is InitialCost + 3
 .
 
@@ -157,8 +199,8 @@ calculaH([_|Squares], H)
 innerCalculaH([], H)
     :- H = 0 .
 
-innerCalculaH([Square | T], H)
+innerCalculaH([Square | Squares], H)
 :-
-    innerCalculaH(T, InnerH),
+    innerCalculaH(Squares, InnerH),
     (Square = 1, H is InnerH + 1 ; Square = 0 , H is InnerH)
 .
