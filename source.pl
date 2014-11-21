@@ -31,8 +31,12 @@ best_first([[F, G, D, H]|T], C, [_, G, _, _])
 best_first([[F, S, D, H]|T], C, [_,G,_,_])
 :-
     write('Best first em andamento'), nl,
+    
+    write('Atual'), nl,
+    printlist([[F, S, D, H]]), nl,
+
     write('Open'), nl,
-    printlist([[F, S, D, H]|T]), nl,
+    printlist(T), nl,
     
     write('Closed'), nl,
     printlist(C), nl,
@@ -191,5 +195,5 @@ innerCalculaH([], H)
 innerCalculaH([Square | Squares], H)
 :-
     innerCalculaH(Squares, InnerH),
-    (Square = 1, H is InnerH + 1 ; Square = 0 , H is InnerH)
+    (Square = 1, H is InnerH + 1 ; Square = 0, H is InnerH)
 .
