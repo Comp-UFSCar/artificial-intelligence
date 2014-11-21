@@ -1,4 +1,4 @@
-=== Dust cleaner ===
+# Dust cleaner
 
 ## Introduction
 
