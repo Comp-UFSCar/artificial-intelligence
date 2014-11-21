@@ -152,17 +152,6 @@ cleanSquare([_|Squares], Nth, Current, [0 | Result])
     !
 .
 
-wasAnySquareCleaned([Square | _], [NewSquare | _])
-:-
-    Square =\= NewSquare,
-    !
-.
-
-wasAnySquareCleaned([_ | Squares], [_ | NewSquares])
-:-
-    wasAnySquareCleaned(Squares, NewSquares)
-.
-
 % Returns G(State), where G is the function cost on a given state @State.
 % 
 % @param State
